@@ -5,9 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../services/product_service.dart';
 import '../model/product_model.dart';
 
-
 class ProductListScreen extends StatefulWidget {
-  final String keywords;
+  final List<String> keywords;
 
   ProductListScreen({required this.keywords});
 
@@ -25,15 +24,17 @@ class _ProductListScreenState extends State<ProductListScreen> {
     _searchProducts();
   }
 
-  // Search products based on the keywords passed from the previous screen
   Future<void> _searchProducts() async {
-    // final keyword =
-    //     widget.keywords.join(' '); // Combine keywords into one search query
-    //   print("keyword1213 : "+keyword);
-    final productResults = await ProductSearchService.fetchProducts(widget.keywords);
+    List<Product> allProducts = [];
+
+    for (String keyword in widget.keywords) {
+      final productResults = await ProductSearchService.fetchProducts(keyword);
+      allProducts
+          .addAll(productResults.map((e) => Product.fromJson(e)).toList());
+    }
 
     setState(() {
-      products = productResults.map((e) => Product.fromJson(e)).toList();
+      products = allProducts;
       isLoading = false;
     });
   }
@@ -53,8 +54,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                       crossAxisCount: 2,
                       crossAxisSpacing: 16.0,
                       mainAxisSpacing: 16.0,
-                      childAspectRatio:
-                          0.7, // Aspect ratio adjusted for compact cards
+                      childAspectRatio: 0.7,
                     ),
                     itemCount: products.length,
                     itemBuilder: (context, index) {
@@ -66,67 +66,83 @@ class _ProductListScreenState extends State<ProductListScreen> {
     );
   }
 
-  // Build a compact product card widget to display product details
   Widget _buildProductCard(Product product) {
     return GestureDetector(
       onTap: () => ProductSearchService.launchProductUrl(product.link),
       child: Card(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0), // Slightly rounded corners
+          borderRadius: BorderRadius.circular(16.0), // More rounded corners
         ),
-        elevation: 4.0,
+        elevation: 6.0, // Increased elevation for better shadow
+        margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Display the product image at the top of the card
             ClipRRect(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(12.0),
-                topRight: Radius.circular(12.0),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16.0),
+                topRight: Radius.circular(16.0),
               ),
               child: product.imageUrl.isNotEmpty
                   ? Image.network(
                       product.imageUrl,
-                      height: 120.0, // Fixed height for the image
-                      width: double.infinity,
-                      fit: BoxFit.fitWidth, // Ensure the image is fully shown
-                    )
-                  : Container(
                       height: 120.0,
-                      color: Colors.grey[200],
-                      child:
-                          Center(child: Icon(Icons.image, color: Colors.grey)),
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        // Default image on error
+                        return Image.network(
+                          'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Image_not_available.png/640px-Image_not_available.png',
+                          height: 120.0,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        );
+                      },
+                    )
+                  : Image.network(
+                      'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Image_not_available.png/640px-Image_not_available.png',
+                      height: 120.0,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
                     ),
+
             ),
-            // Display the title of the product
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(12.0),
               child: Text(
                 product.title,
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 14.0,
-                  height: 1.3, // Spacing between lines of text
+                  fontSize: 16.0,
+                  height: 1.5,
                 ),
                 maxLines: 2,
-                overflow:
-                    TextOverflow.ellipsis, // Ensure text does not overflow
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            // More Info button at the bottom of the card
             Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-              child: ElevatedButton(
-                onPressed: () =>
-                    ProductSearchService.launchProductUrl(product.link),
-                child: Text("More Info"),
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
+                  const EdgeInsets.only(left: 12.0, right: 12.0, bottom: 12.0),
+              child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      backgroundColor: Colors.blueAccent, // Updated property
+                      padding: const EdgeInsets.symmetric(vertical: 12.0),
+                    ),
+                    onPressed: () =>
+                        ProductSearchService.launchProductUrl(product.link),
+                    child: const Text(
+                      "More Info",
+                      style: TextStyle(
+                          fontSize: 14.0, fontWeight: FontWeight.bold),
+                    ),
+                  )),
             ),
-        )],
+          ],
         ),
       ),
     );

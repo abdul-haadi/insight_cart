@@ -13,6 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Product Search',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -29,9 +30,8 @@ class KeywordInputScreen extends StatefulWidget {
 class _KeywordInputScreenState extends State<KeywordInputScreen> {
   final TextEditingController _controller = TextEditingController();
   bool isLoading = false;
-  String keywords = "";
+  List<String> keywords = [];
 
-  // Handle text input submission
   void _extractKeywords() async {
     final inputText = _controller.text;
     if (inputText.isEmpty) return;
@@ -42,7 +42,6 @@ class _KeywordInputScreenState extends State<KeywordInputScreen> {
 
     final extractedKeywords = await KeywordExtractionService.extract(inputText);
 
-    print("extractedKeywords : " + extractedKeywords.toString());
     setState(() {
       keywords = extractedKeywords;
       isLoading = false;
@@ -50,7 +49,6 @@ class _KeywordInputScreenState extends State<KeywordInputScreen> {
 
     // Navigate to product search screen with extracted keywords
     if (keywords.isNotEmpty) {
-      // print("keywords ----------------: " + keywords.toString());
       Navigator.push(
         context,
         MaterialPageRoute(

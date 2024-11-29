@@ -7,16 +7,15 @@ import 'package:url_launcher/url_launcher.dart'; // To launch URLs when product 
 
 class ProductSearchService {
   static const apiKey =
-      'AIzaSyBlGH7k-1X9shJ3c26IFJ8C4lj_z1WrVqo'; // Replace with your Google API key
+      'Your Key Api Key'; // Replace with your Google API key
   static const cx =
-      '725caebf197eb41ee'; // Replace with your Custom Search Engine ID
+      'Custom Search Engine Id'; // Replace with your Custom Search Engine ID
 
   // Fetch products based on a keyword (query)
   static Future<List<Map<String, dynamic>>> fetchProducts(
       String keyword) async {
     final url =
         'https://www.googleapis.com/customsearch/v1?q=$keyword&key=$apiKey&cx=$cx';
-    print("Fetcch Product");
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
